@@ -1,6 +1,7 @@
 require 'csv'
 require 'google/apis/civicinfo_v2'
 require 'erb'
+require 'time'
 
 
 def clean_zipcode(zipcode)
@@ -35,6 +36,17 @@ def save_thank_you_letter(id,form_letter)
   end
 end
 
+def clean_phone(phone)
+  phone = phone.gsub(/[- .()]/, '')
+  if phone.length == 10
+    phone
+  elsif phone.length == 11 && phone[0] == "1"
+    phone = phone[1..10]
+  else
+    "bad number!"
+  end
+end
+
 puts 'Event Manager Initialized!'
 
 contents = CSV.open(
@@ -50,17 +62,17 @@ contents.each do |row|
   id = row[0]
   name = row[:first_name]
   zipcode = clean_zipcode(row[:zipcode])
+  phone = clean_phone(row[:homephone])
 
-  phone = row[:homephone].gsub(/[- .()]/, '')
-  p phone
+  raw_date = row[:regdate]
+  datedate = Time.strptime(raw_date, "%m/%d/%y %H:%M")
 
-
-
+  days = Hash.new
 
 
   legislators = legilators_by_zip_code(zipcode)
-  # form_letter = erb_template.result(binding)
-  # save_thank_you_letter(id, form_letter)
+  form_letter = erb_template.result(binding)
+  save_thank_you_letter(id, form_letter)
 
 
 
