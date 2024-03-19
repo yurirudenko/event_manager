@@ -47,6 +47,20 @@ def clean_phone(phone)
   end
 end
 
+def most_common(array)
+  array.max_by {|a| array.count(a)}
+end
+
+weekdays = {
+  0 => "Sunday",
+  1 => "Monday",
+  2 => "Tuesday",
+  3 => "Wednesday",
+  4 => "Thursday",
+  5 => "Friday",
+  6 => "Saturday"
+}
+
 puts 'Event Manager Initialized!'
 
 contents = CSV.open(
@@ -56,6 +70,8 @@ contents = CSV.open(
   )
   template_letter = File.read('form_letter.erb')
   erb_template = ERB.new template_letter
+  days = []
+  hours = []
 
 
 contents.each do |row|
@@ -64,10 +80,13 @@ contents.each do |row|
   zipcode = clean_zipcode(row[:zipcode])
   phone = clean_phone(row[:homephone])
 
+
   raw_date = row[:regdate]
   datedate = Time.strptime(raw_date, "%m/%d/%y %H:%M")
+  days << datedate.wday
+  hours << datedate.hour
 
-  days = Hash.new
+
 
 
   legislators = legilators_by_zip_code(zipcode)
@@ -79,3 +98,6 @@ contents.each do |row|
   # puts "#{name} - #{zipcode} - #{legislators}"
 
 end
+
+p "The most common day is #{weekdays[most_common(days)]}"
+p "The most common hour is #{most_common(hours)}"
